@@ -4,6 +4,7 @@ langchain==0.1.14
 langchain-community==0.0.30
 langchain-openai==0.0.8
 langchain-text-splitters==0.0.1
+langchain-huggingface==0.0.3
 
 pypdf==4.2.0
 sentence-transformers==2.2.2
