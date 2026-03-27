@@ -1,0 +1,7 @@
+.env
+faiss_index/
+__pycache__/
+temp_*.pdf
+temp.pdf
+*.pyc
+.sfdx

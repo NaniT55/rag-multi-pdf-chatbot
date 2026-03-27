@@ -1,0 +1,10 @@
+langchain==0.1.14
+langchain-community==0.0.30
+langchain-openai==0.0.8
+langchain-text-splitters
+pypdf
+faiss-cpu
+sentence-transformers
+streamlit
+groq
+python-dotenv
