@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
@@ -30,10 +30,10 @@ def create_vector_store(chunks):
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-    vectorstore = FAISS.from_documents(chunks, embeddings)
-
-    # Save index (for performance)
-    vectorstore.save_local("faiss_index")
+    vectorstore = Chroma.from_documents(
+        chunks,
+        embedding=embeddings
+    )
 
     return vectorstore
 
