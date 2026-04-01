@@ -1,20 +1,18 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings          # ✅ fixed import
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import streamlit as st
 
-
-# 📄 Load PDF
+# Load PDF
 def load_pdf(file_path):
     loader = PyPDFLoader(file_path)
     return loader.load()
 
-
-# ✂️ Split text
+# Split text
 def split_text(documents):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=600,
@@ -22,24 +20,27 @@ def split_text(documents):
     )
     return splitter.split_documents(documents)
 
-
-# 🧠 Create vector store
+# Vector store (Chroma - deployment safe)
 def create_vector_store(chunks):
+
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
+
     vectorstore = Chroma.from_documents(
         chunks,
-        embedding=embeddings
+        embedding=embeddings,
+        persist_directory="chroma_db"
     )
+
     return vectorstore
 
-
-# 🤖 Create QA chain
+# QA chain
 def create_qa_chain(vectorstore):
+
     llm = ChatOpenAI(
-        api_key=st.secrets["OPENAI_API_KEY"],           # ✅ updated param name
-        base_url="https://api.groq.com/openai/v1",      # ✅ updated param name
+        openai_api_key=st.secrets["OPENAI_API_KEY"],
+        openai_api_base="https://api.groq.com/openai/v1",
         model="llama-3.1-8b-instant",
         temperature=0
     )
@@ -47,7 +48,6 @@ def create_qa_chain(vectorstore):
     prompt_template = """You are a helpful assistant.
 
 Use ONLY the context below to answer the question.
-Do NOT use external knowledge.
 If the answer is not in the context, say "I don't know".
 
 Context:
@@ -66,8 +66,7 @@ Answer:"""
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": prompt}
+        return_source_documents=False
     )
 
     return qa_chain
